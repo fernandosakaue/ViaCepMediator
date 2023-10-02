@@ -1,4 +1,7 @@
+using MediatR;
 using System.Reflection;
+using ViaCepMediator.Apis.ViaCepMediatorHandler;
+using ViaCepMediator.Integration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +12,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+
+builder.Services.AddScoped<IRequestHandler<ViaCepMediatorRequest, ViaCepMediatorResponse>>(x => new ViaCepMediatorHandler(
+        x.GetRequiredService<IViaCepClient>()));
+
+builder.Services.AddScoped<IViaCepClient>(x => new ViaCepClient(
+    new HttpClient(),
+    x.GetRequiredService<ILogger<ViaCepClient>>()));
 
 var app = builder.Build();
 
